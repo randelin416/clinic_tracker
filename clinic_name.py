@@ -11,7 +11,11 @@ def fetch_clinic_names():
     url = "https://www.kmuh.org.tw/Web/WebRegistration/OPDSeq/ProcessMain?lang=tw"
 
     # 發起 HTTP 請求獲取網頁內容
-    response = requests.get(url)
+    response = requests.get(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        })
 
     # 檢查請求是否成功
     if response.status_code == 200:
@@ -21,18 +25,20 @@ def fetch_clinic_names():
         soup = BeautifulSoup(response.text, "html.parser")
         
         # 假設所有門診進度的區域包含在 id 為 "ListBlock" 的 div 中
-        list_block_div = soup.find("div", {"id": "ListBlock"})
+        clinicNames = soup.find("div.SeqDeptTitle > span")
         
         # 檢查是否找到了相應的 div
-        if list_block_div:
-            # 提取所有門診進度信息
-            clinic_schedules = list_block_div.find_all("div", {"class": "SeqDeptItem"})
+        if clinicNames:
+            for d in clinicNames:
+                print(d.text)
+            # # 提取所有門診進度信息
+            # clinic_schedules = list_block_div.find_all("div", {"class": "SeqDeptItem"})
             
-            # 提取門診名稱
-            clinic_names = [clinic.find("div", {"class": "SeqDeptTitle"}).text.strip() for clinic in clinic_schedules]
-            return clinic_names
+            # # 提取門診名稱
+            # clinic_names = [clinic.find("div", {"class": "SeqDeptTitle"}).text.strip() for clinic in clinic_schedules]
+            # return clinic_names
         else:
-            print("未找到包含所有門診進度的相應 div 元素。")
+            print("未找到包含所有門診名稱的相應 div 元素。")
     else:
         print("網頁請求失敗，錯誤碼：", response.status_code)
 
